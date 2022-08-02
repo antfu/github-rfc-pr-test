@@ -41,11 +41,11 @@ jobs:
             }
             else {
               const discussionBody = [
-                'This is an [RFC](https://github.com/vitejs/vite/rfcs) proposal. To participle the process, please read thoroughly about the proposal and then provide feedback or join the discussions below.',
+                `This is an [RFC](https://github.com/vitejs/vite/rfcs) proposal by @${context.payload.pull_request.user.login}. To participle the process, please read thoroughly about the proposal and then provide feedback or join the discussions below.`,
                 '',
-                `[Full Rendered Proposal](${renderedUrl})`,
+                `- [📖 Full Rendered Proposal](${renderedUrl})`,
                 '',
-                `RFC Pull Request: ${context.payload.pull_request.html_url}`
+                `- 🧑‍💻 Pull Request ${context.payload.pull_request.html_url}`
               ].join('\\n')
               const query = `mutation {
                 createDiscussion(input: { repositoryId: "${context.payload.pull_request.base.repo.node_id}", categoryId: "${RFC_CAT_ID}", body: "${discussionBody}", title: "${context.payload.pull_request.title}"}) {
@@ -76,7 +76,6 @@ jobs:
                 `[📖 Full Rendered Proposal](${renderedUrl})`,
                 '',
                 `[💬 Discussion Thread](${discussionUrl})`,
-                '',
                 '<br>',
                 '',
                 '> **Note**',
