@@ -13,7 +13,7 @@ jobs:
             const diff = await github.request(files_url)
             const addedFiles = diff.data.filter(i => i.status === 'added')
             console.log({ addedFiles: addedFiles.map(i=>i.filename) })
-            const rfcFile = addFiles.find(i => i.filename.startsWith('rfcs/') && i.filename.endsWith('.md'))
+            const rfcFile = addedFiles.find(i => i.filename.startsWith('rfcs/') && i.filename.endsWith('.md'))
 
             if (!rfcFile) {
               console.log('No RFC file found')
