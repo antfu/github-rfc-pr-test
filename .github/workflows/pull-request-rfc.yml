@@ -20,27 +20,39 @@ jobs:
               return
             }
 
-            const repoUrl = context.payload.pull_request.base.repo.html_url
-            const renderedUrl = context.payload.pull_request.head.repo.html_url + '/blob/' + context.payload.pull_request.head.ref + '/' + rfcFile.filename
-            
-            console.log('RFC file found ' + renderedUrl)
-            
-            const discussionBody = [
-               `[Rendered RFC](${renderedUrl})`,
-               '',
-               `[Pull Request](${context.payload.pull_request.html_url})`
-            ].join('\\n')
-            const query = `mutation {
-              createDiscussion(input: { repositoryId: "${context.payload.pull_request.base.repo.node_id}", categoryId: "${RFC_CAT_ID}", body: "${discussionBody}", title: "${context.payload.pull_request.title}"}) {
-                discussion {
-                  url
-                }
-              }
-            }`
-            const result = await github.graphql(query)
-            const discussionUrl = result.createDiscussion.discussion.url
+            function escapeRegExp(string) {
+              return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            }
 
-            console.log('Discussion created ' + discussionUrl)
+            const repoUrl = context.payload.pull_request.base.repo.html_url
+            const discussionUrlRegex = new RegExp(escapeRegExp(repoUrl + '/discussions/') + '\\d+')
+            const renderedUrl = context.payload.pull_request.head.repo.html_url + '/blob/' + context.payload.pull_request.head.ref + '/' + rfcFile.filename
+            let discussionUrl
+
+            console.log('RFC file found ' + renderedUrl)
+
+            const existingDiscussion = context.payload.pull_request.body.match(discussionUrlRegex)
+            if (existingDiscussion?.[0]) {
+              discussionUrl = existingDiscussion?.[0]
+              console.log('Existing Discussion found ' + discussionUrl)
+            }
+            else {
+              const discussionBody = [
+                `[Full Rendered Proposal](${renderedUrl})`,
+                '',
+                `RFC Pull Request: ${context.payload.pull_request.html_url}`
+              ].join('\\n')
+              const query = `mutation {
+                createDiscussion(input: { repositoryId: "${context.payload.pull_request.base.repo.node_id}", categoryId: "${RFC_CAT_ID}", body: "${discussionBody}", title: "${context.payload.pull_request.title}"}) {
+                  discussion {
+                    url
+                  }
+                }
+              }`
+              const result = await github.graphql(query)
+              discussionUrl = result.createDiscussion.discussion.url
+              console.log('Discussion created ' + discussionUrl)
+            }
 
             await github.rest.issues.addLabels({
               issue_number: context.issue.number,
@@ -56,9 +68,11 @@ jobs:
               body: [
                 'This is an RFC pull request.',
                 '',
-                `[Rendered RFC](${renderedUrl})`,
+                `[Full Rendered Proposal](${renderedUrl})`,
                 '',
                 `[Discussion Thread](${discussionUrl})`,
+                '',
+                '----',
                 '',
                 '> **Note**',
                 '> **Important: Do NOT comment on this PR. Please use the discussion thread linked above to provide feedback, as it provides branched discussions that are easier to follow. This also makes the edit history of the PR clearer.**'
