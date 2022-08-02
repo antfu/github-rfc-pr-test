@@ -1,6 +1,8 @@
 name: RFC Pull Request
 
-on: pull_request
+on:
+  pull_request:
+    - open
 
 jobs:
   label:
@@ -39,7 +41,7 @@ jobs:
             }
             else {
               const discussionBody = [
-                'This is an [RFC](https://github.com/vitejs/vite/rfcs). To participle the process, please read thoroughly about the proposal and then provide feedback or join the discussion below.',
+                'This is an [RFC](https://github.com/vitejs/vite/rfcs) proposal. To participle the process, please read thoroughly about the proposal and then provide feedback or join the discussions below.',
                 '',
                 `[Full Rendered Proposal](${renderedUrl})`,
                 '',
@@ -69,12 +71,15 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: [
-                'This is an [RFC](https://github.com/vitejs/vite/rfcs) pull request. To participle the process, please read thoroughly about the proposal and provide feedback in the discussion with the link below.',
+                'This is an [RFC](https://github.com/vitejs/vite/rfcs) pull request. To participle the process, please read thoroughly about the proposal and provide feedback in the discussion thread with the link below.',
                 '',
                 `[📖 Full Rendered Proposal](${renderedUrl})`,
+                ''
                 `[💬 Discussion Thread](${discussionUrl})`,
                 '',
-                '> **Node**',
+                '<br>',
+                '',
+                '> **Note**',
                 '> **Do NOT comment on this PR. Please use the discussion thread linked above to provide feedback, as it provides branched discussions that are easier to follow. This also makes the edit history of the PR clearer.**'
               ].join('\n')
             })
