@@ -74,7 +74,7 @@ jobs:
                 'This is an [RFC](https://github.com/vitejs/vite/rfcs) pull request. To participle the process, please read thoroughly about the proposal and provide feedback in the discussion thread with the link below.',
                 '',
                 `[📖 Full Rendered Proposal](${renderedUrl})`,
-                ''
+                '',
                 `[💬 Discussion Thread](${discussionUrl})`,
                 '',
                 '<br>',
