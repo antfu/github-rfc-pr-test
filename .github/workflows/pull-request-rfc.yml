@@ -9,9 +9,18 @@ jobs:
       - uses: actions/github-script@v6
         with:
           script: |
-            const diff_url = context.payload.pull_request.diff_url
-            const result = await github.request(diff_url)
-            console.log(result)
+            const files_url = context.payload.pull_request.url + '/files'
+            const diff = await github.request(files_url)
+            const addedFiles = diff.data.filter(i => i.status === 'added')
+            console.log({ addedFiles: addedFiles.map(i=>i.filename) })
+            const rfcFile = addFiles.find(i => i.filename.startsWith('rfcs/') && i.filename.endsWith('.md'))
+
+            if (!rfcFile) {
+              console.log('No RFC file found')
+              return
+            }
+
+            const renderedUrl = context.payload.pull_request.head.repo.html_url + '/tree' + context.payload.pull_request.head.ref + '/' + rfcFile.filename
 
             await github.rest.issues.addLabels({
               issue_number: context.issue.number,
@@ -24,13 +33,14 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `This is an RFC pull request.
-
-                [Rendered RFC](...)
-
-                [Discussion Thread](...)
-
-                > **Note**
-                > **Important: Do NOT comment on this PR. Please use the discussion thread linked above to provide feedback, as it provides branched discussions that are easier to follow. This also makes the edit history of the PR clearer.**
-              `
+              body: [
+                'This is an RFC pull request.',
+                '',
+                `[Rendered RFC](${renderedUrl})`,
+                '',
+                `[Discussion Thread](...)`,
+                '',
+                '> **Note**',
+                '> **Important: Do NOT comment on this PR. Please use the discussion thread linked above to provide feedback, as it provides branched discussions that are easier to follow. This also makes the edit history of the PR clearer.**'
+              ].join('\n')
             })
