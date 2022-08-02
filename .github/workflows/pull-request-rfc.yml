@@ -20,6 +20,8 @@ jobs:
               return
             }
 
+            console.log('RFC file found ' + renderedUrl)
+
             const repoUrl = context.payload.pull_request.base.repo.html_url
             const renderedUrl = context.payload.pull_request.head.repo.html_url + '/blob/' + context.payload.pull_request.head.ref + '/' + rfcFile.filename
             
@@ -31,14 +33,14 @@ jobs:
             const query = `mutation {
               createDiscussion(input: { repositoryId: "${context.payload.pull_request.base.repo.node_id}", categoryId: "${RFC_CAT_ID}", body: "${discussionBody}", title: "${context.payload.pull_request.title}"}) {
                 discussion {
-                  id
+                  url
                 }
               }
             }`
             const result = await github.graphql(query)
-            console.log(result)
+            const discussionUrl = result.createDiscussion.discussion.url
 
-            console.log('RFC file found ' + renderedUrl)
+            console.log('Discussion created ' + discussionUrl)
 
             await github.rest.issues.addLabels({
               issue_number: context.issue.number,
@@ -56,9 +58,23 @@ jobs:
                 '',
                 `[Rendered RFC](${renderedUrl})`,
                 '',
-                `[Discussion Thread](...)`,
+                `[Discussion Thread](${discussionUrl})`,
                 '',
                 '> **Note**',
                 '> **Important: Do NOT comment on this PR. Please use the discussion thread linked above to provide feedback, as it provides branched discussions that are easier to follow. This also makes the edit history of the PR clearer.**'
               ].join('\n')
             })
+
+# To get category ID, execute following GraphQL in https://docs.github.com/en/graphql/overview/explorer
+# query {
+#   repository(owner: "vitejs", name: "vite") {
+#     discussionCategories(first: 10) {
+#       edges {
+#         node {
+#           name
+#           id
+#         }
+#       }
+#     }
+#   }
+# }
