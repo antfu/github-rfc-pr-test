@@ -10,6 +10,7 @@ jobs:
         with:
           script: |
             const RFC_CAT_ID = 'DIC_kwDOHwUU6s4CQkn_'
+
             const files_url = context.payload.pull_request.url + '/files'
             const diff = await github.request(files_url)
             const addedFiles = diff.data.filter(i => i.status === 'added')
@@ -31,7 +32,7 @@ jobs:
 
             console.log('RFC file found ' + renderedUrl)
 
-            const existingDiscussion = context.payload.pull_request.body.match(discussionUrlRegex)
+            const existingDiscussion = context.payload.pull_request.body?.match(discussionUrlRegex)
             if (existingDiscussion?.[0]) {
               discussionUrl = existingDiscussion?.[0]
               console.log('Existing Discussion found ' + discussionUrl)
